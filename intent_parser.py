@@ -1,28 +1,44 @@
 import json
-from gemini_service import ask_gemini
+import re
+from gemini_service import call_gemini
 
-def extract_intent(command):
+def clean_json(text: str) -> str:
+    # Remove ```json and ``` fences
+    text = re.sub(r"```json|```", "", text)
+    return text.strip()
+
+def extract_intent(user_command: str) -> dict:
     prompt = f"""
-You are an intent extraction engine.
+You are an intent extraction engine for industrial IoT commands.
 
-User command: "{command}"
+Return ONLY valid JSON.
+Do NOT wrap in markdown.
+Do NOT explain.
 
-Extract intent strictly in JSON:
+JSON schema:
 {{
-  "device": "<device name>",
-  "action": "<on/off/increase/decrease>"
+  "intent": "",
+  "device": "",
+  "action": "",
+  "sensor": "",
+  "condition": {{
+    "sensor": "",
+    "operator": "",
+    "value": ""
+  }}
 }}
+
+User command:
+"{user_command}"
 """
 
-    response = ask_gemini(prompt)
+    response = call_gemini(prompt)
+    cleaned = clean_json(response)
 
     try:
-        json_start = response.find("{")
-        json_end = response.rfind("}") + 1
-        intent_json = response[json_start:json_end]
-        return json.loads(intent_json)
-    except:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
         return {
-            "device": "unknown",
-            "action": "unknown"
+            "intent": "UNKNOWN",
+            "raw_response": response
         }

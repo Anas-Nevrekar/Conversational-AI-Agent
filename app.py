@@ -1,12 +1,7 @@
 from flask import Flask, request, jsonify
 from intent_parser import extract_intent
-from device_controller import control_device
 
 app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Conversational AI Agent is running"
 
 @app.route("/command", methods=["POST"])
 def handle_command():
@@ -18,12 +13,10 @@ def handle_command():
     user_command = data["command"]
 
     intent = extract_intent(user_command)
-    result = control_device(intent["device"], intent["action"])
 
     return jsonify({
-        "command": user_command,
-        "intent": intent,
-        "result": result
+        "user_command": user_command,
+        "intent_extracted": intent
     })
 
 if __name__ == "__main__":

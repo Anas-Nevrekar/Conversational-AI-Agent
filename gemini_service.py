@@ -1,10 +1,11 @@
-import google.generativeai as genai
+from google import genai
 from config import GEMINI_API_KEY
 
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel("gemini-pro")
-
-def ask_gemini(prompt):
-    response = model.generate_content(prompt)
+def call_gemini(prompt: str) -> str:
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
     return response.text
