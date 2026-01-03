@@ -8,4 +8,8 @@ def call_gemini(prompt: str) -> str:
         model="gemini-2.5-flash",
         contents=prompt
     )
-    return response.text
+
+    if hasattr(response, "text") and response.text:
+        return response.text.strip()
+
+    return response.candidates[0].content.parts[0].text.strip()
