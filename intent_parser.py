@@ -3,19 +3,20 @@ import re
 from gemini_service import call_gemini
 
 def clean_json(text: str) -> str:
-    # Remove ```json and ``` fences
     text = re.sub(r"```json|```", "", text)
     return text.strip()
 
 def extract_intent(user_command: str) -> dict:
     prompt = f"""
-You are an intent extraction engine for industrial IoT commands.
+You are an intent extraction engine.
 
-Return ONLY valid JSON.
-Do NOT wrap in markdown.
-Do NOT explain.
+RULES:
+- Return ONLY valid JSON
+- No explanation
+- No markdown
+- No extra text
 
-JSON schema:
+JSON FORMAT:
 {{
   "intent": "",
   "device": "",
@@ -37,8 +38,8 @@ User command:
 
     try:
         return json.loads(cleaned)
-    except json.JSONDecodeError:
+    except Exception:
         return {
-            "intent": "UNKNOWN",
+            "intent": "PARSE_ERROR",
             "raw_response": response
         }
